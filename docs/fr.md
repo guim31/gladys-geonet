@@ -154,4 +154,6 @@ sont ignorés.
   déclencheur part une fois, avec les premières valeurs.
 - Les phrases d'activité et de dangers et les lieux sont en anglais, comme GeoNet les écrit.
 - La date du dernier changement de niveau n'est connue que par l'observation de l'intégration.
+- Quand plus aucun séisme ne reste dans le rayon, la magnitude, l'intensité et la distance gardent les
+  valeurs du dernier (leur historique) ; le texte et le compte sur 24 h disent qu'il n'y en a plus.
 - Le nom d'un appareil et de ses fonctionnalités est figé à sa création, dans la langue choisie alors.

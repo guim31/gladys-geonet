@@ -147,7 +147,9 @@ export const WIDGETS = {
       const shown = monitor.shown();
       const listed = onlyElevated ? shown.filter(isElevated) : shown;
       const items = [];
-      const quakes = monitor.config.quakeRadiusKm > 0 ? monitor.quakes : null;
+      // An earthquake read before GeoNet failed is not shown as current.
+      const quakes =
+        monitor.config.quakeRadiusKm > 0 && !monitor.failing.has('quakes') ? monitor.quakes : null;
       if (showQuake && quakes?.[0]) {
         items.push(quakeItem(quakes[0], lang));
       }

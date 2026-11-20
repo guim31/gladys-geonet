@@ -19,7 +19,7 @@
 // changed, plus a heartbeat every 12 hours.
 // -----------------------------------------------------------------------------
 
-import { createHash } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { createLogger } from '@gladysassistant/integration-sdk';
 import { colorRank } from './config.js';
 import {
@@ -36,6 +36,7 @@ import {
   COLOR_NAMES,
   PHRASES,
   STATUS,
+  clip,
   describe,
   join,
   mmiName,
@@ -362,6 +363,7 @@ export class Monitor {
     if (volcanoes) {
       this.lastSuccessAt = this.now();
     }
+    this.recovered('cycle', 'Refresh cycles work again');
     logger.debug(
       `Refresh cycle: ${this.volcanoes.length} volcano(es), ${this.followed.length} followed, ${this.quakes?.length ?? 'no'} earthquake(s) in the radius`,
     );
@@ -410,11 +412,12 @@ export class Monitor {
       if (before.level === volcano.level && before.color === volcano.color) {
         continue;
       }
+      const changedAt = before.changedAt;
       if (before.level !== volcano.level) {
         before.changedAt = now;
         volcano.changedAt = now;
       }
-      const previous = { level: before.level, color: before.color };
+      const previous = { level: before.level, color: before.color, changedAt };
       before.level = volcano.level;
       before.color = volcano.color;
       // A level GeoNet stops giving (null) and gives back is not a change.
@@ -423,23 +426,32 @@ export class Monitor {
       }
     }
     for (const change of changes) {
-      await this.fireAlert(change);
+      if (!(await this.fireAlert(change))) {
+        // Not delivered: the change stays news, fired again at the next cycle.
+        Object.assign(known[change.volcano.id], change.previous);
+      }
     }
   }
 
   async fireAlert({ volcano, previous }) {
-    logger.info(
-      `${volcano.name}: level ${previous.level} / ${previous.color} → ${volcano.level} / ${volcano.color}`,
-    );
-    await this.fire(ALERT_TRIGGER, this.alertData(volcano, previous));
+    const fired = await this.fire(ALERT_TRIGGER, this.alertData(volcano, previous));
+    if (fired) {
+      logger.info(
+        `${volcano.name}: level ${previous.level} / ${previous.color} → ${volcano.level} / ${volcano.color}`,
+      );
+    }
+    return fired;
   }
 
+  /** Publish a scene event; false when Gladys did not take it. */
   async fire(trigger, data) {
     try {
       await this.gladys.publishSceneEvent(trigger, data);
       this.recovered('scene', 'Scene triggers work again');
+      return true;
     } catch (err) {
       this.failed('scene', 'warn', `Firing the scene trigger failed: ${err.message}`);
+      return false;
     }
   }
 
@@ -456,8 +468,9 @@ export class Monitor {
       previous_alert_level: String(previous.level),
       aviation_color: volcano.color ?? '',
       aviation_color_name: COLOR_NAMES[language][volcano.color] ?? '',
-      activity: volcano.activity,
-      hazards: volcano.hazards,
+      // The core refuses a string field over 1000 characters.
+      activity: clip(volcano.activity, 1000),
+      hazards: clip(volcano.hazards, 1000),
       distance_km: volcano.distanceKm === null ? null : Math.round(volcano.distanceKm),
       summary: describe(volcano, language),
       url: volcanoPage(volcano.id),
@@ -466,8 +479,9 @@ export class Monitor {
 
   /** Fire `quake_felt` for the new, recent earthquakes of the radius. */
   async detectQuakes(quakes, center) {
-    // A hash: the location of the house is not written to /data.
-    const key = createHash('sha256')
+    // A salted hash: the location of the house cannot be read back from /data.
+    this.data.salt ??= randomBytes(16).toString('hex');
+    const key = createHmac('sha256', this.data.salt)
       .update(
         JSON.stringify([
           this.config.quakeRadiusKm,
@@ -492,11 +506,16 @@ export class Monitor {
       return;
     }
     for (const quake of news) {
-      logger.info(
-        `Felt earthquake: M${quake.magnitude}, MMI ${quake.mmi}, ${Math.round(quake.distanceKm)} km away`,
-      );
-      await this.fire(QUAKE_TRIGGER, this.quakeData(quake));
+      if (await this.fire(QUAKE_TRIGGER, this.quakeData(quake))) {
+        logger.info(
+          `Felt earthquake: M${quake.magnitude}, MMI ${quake.mmi}, ${Math.round(quake.distanceKm)} km away`,
+        );
+      } else {
+        // Not delivered: still news at the next cycle (within its six hours).
+        seen.delete(quake.id);
+      }
     }
+    this.data.seenQuakes = [...seen].slice(-SEEN_QUAKES);
   }
 
   /** The flat data of a `quake_felt` event. */
@@ -508,7 +527,7 @@ export class Monitor {
       mmi_name: mmiName(quake.mmi, language),
       distance_km: Math.round(quake.distanceKm),
       depth_km: quake.depthKm,
-      locality: quake.locality,
+      locality: clip(quake.locality, 1000),
       time: new Date(quake.time).toISOString(),
       summary: quakeText(quake, language),
       url: quake.url,
@@ -678,13 +697,17 @@ export class Monitor {
       await this.running;
     }
     // The last cycle failed: the levels are not current, the actions say so.
-    return { volcanoes: this.shown(), ok: this.geonetOk };
+    // The earthquakes alone down: the levels are current, the sentence skips them.
+    return {
+      volcanoes: this.shown(),
+      ok: this.lastSuccessAt !== null && !this.failing.has('volcanoes'),
+    };
   }
 
   /** The sentence of the actions: the volcanoes, then the latest felt earthquake. */
   sentence(language) {
     const parts = [sentence(this.shown(), language)];
-    if (this.config.quakeRadiusKm > 0 && this.quakes) {
+    if (this.config.quakeRadiusKm > 0 && this.quakes && !this.failing.has('quakes')) {
       const latest = this.quakes[0];
       parts.push(
         latest

@@ -153,5 +153,7 @@ werden ignoriert.
   Auslöser feuert einmal, mit den ersten Werten.
 - Die Sätze zu Aktivität und Gefahren und die Orte sind auf Englisch, wie GeoNet sie schreibt.
 - Das Datum der letzten Stufenänderung ist nur aus der eigenen Beobachtung der Integration bekannt.
+- Bleibt kein Erdbeben mehr im Umkreis, behalten Magnitude, Intensität und Entfernung die Werte des
+  letzten (ihren Verlauf); der Text und die 24-h-Zahl sagen, dass es keines mehr gibt.
 - Der Name eines Geräts und seiner Funktionen wird bei der Erstellung festgelegt, in der damals gewählten
   Sprache.

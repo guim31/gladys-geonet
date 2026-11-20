@@ -339,3 +339,44 @@ test('a scan request publishes the devices again', async (t) => {
   await w.fake.scanRequest?.();
   assert.ok(before > 0);
 });
+
+test('a scene event Gladys refuses is fired again at the next cycle', async (t) => {
+  const api = createApi();
+  const w = await world(t, { api });
+  const publish = t.mock.method(w.gladys, 'publishSceneEvent', async () => {
+    throw new Error('Gladys unreachable');
+  });
+  api.setLevel(WHITE_ISLAND, 3, 'Orange');
+  api.addQuake({ id: '2026p999030', now: w.clock.now(), minutesAgo: 2, ...near(20) });
+  await cycle(w);
+  assert.equal(publish.mock.callCount(), 2);
+  publish.mock.restore();
+  await cycle(w);
+  assert.equal(events(w, 'alert_changed').length, 1);
+  assert.equal(events(w, 'quake_felt').length, 1);
+  await cycle(w);
+  assert.equal(events(w, 'alert_changed').length, 1);
+  assert.equal(events(w, 'quake_felt').length, 1);
+});
+
+test('the earthquakes alone down: the actions still answer with the levels', async (t) => {
+  const api = createApi();
+  const w = await world(t, { api, config: { volcanoes: [TAUPO], language: 'en' } });
+  api.downOnly = 'quake';
+  api.down = 503;
+  await cycle(w, 10);
+  const ack = await w.fake.sceneAction('read_geonet', {});
+  assert.equal(ack.success, true);
+  assert.doesNotMatch(ack.data.outputs.text, /earthquake/);
+  const widget = (await w.fake.widgetGet('geonet', { language: 'en' })).data.content;
+  const rows = widget.components.find((c) => c.type === 'card-list').items;
+  assert.ok(!rows.some((row) => row.title.startsWith('M')));
+});
+
+test('/data keeps no coordinate of the centre', async (t) => {
+  const w = await world(t);
+  await w.store.flush();
+  const saved = JSON.stringify(await w.store.load());
+  assert.doesNotMatch(saved, /-?38\.68|176\.07|-3869|17607/);
+  assert.match(saved, /"salt":"[0-9a-f]{32}"/);
+});

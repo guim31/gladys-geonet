@@ -152,4 +152,6 @@ los analistas.
   activa una vez, con los primeros valores.
 - Las frases de actividad y de peligros y los lugares están en inglés, como los escribe GeoNet.
 - La fecha del último cambio de nivel solo se conoce por la observación de la propia integración.
+- Cuando no queda ningún terremoto en el radio, la magnitud, la intensidad y la distancia conservan los
+  valores del último (su historial); el texto y el recuento de 24 h indican que ya no hay ninguno.
 - El nombre de un dispositivo y de sus funciones se fija al crearlo, en el idioma elegido entonces.

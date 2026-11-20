@@ -151,4 +151,6 @@ documents per refresh, every 2 minutes by default. Earthquakes removed by the an
   trigger fires once, with the first values.
 - The activity and hazard sentences and the places are in English, as GeoNet writes them.
 - The date of the last level change is known only from the integration's own observation.
+- When no earthquake is left in the radius, the magnitude, intensity and distance keep the values of the
+  last one (their history); the text and the 24 h count say there is none.
 - The name of a device and of its features is fixed at its creation, in the language chosen then.
