@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-geonet",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Gladys Assistant integration: New Zealand volcanic alert levels and felt earthquakes from GeoNet (GNS Science), with widget and scene triggers.",
   "type": "module",
   "main": "index.js",
   "scripts": {
