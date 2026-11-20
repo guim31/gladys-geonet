@@ -363,7 +363,6 @@ export class Monitor {
     if (volcanoes) {
       this.lastSuccessAt = this.now();
     }
-    this.recovered('cycle', 'Refresh cycles work again');
     logger.debug(
       `Refresh cycle: ${this.volcanoes.length} volcano(es), ${this.followed.length} followed, ${this.quakes?.length ?? 'no'} earthquake(s) in the radius`,
     );
@@ -380,6 +379,7 @@ export class Monitor {
       this.widgetSignature = signature;
       this.requestRefresh();
     }
+    this.recovered('cycle', 'Refresh cycles work again');
   }
 
   /** The volcanoes the widget and the sentences list: followed, and all elevated with `national`. */
