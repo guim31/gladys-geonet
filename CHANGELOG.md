@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-20
+
 ### Added
 
 - One device per followed New Zealand volcano: Volcanic Alert Level (0 to 5),
@@ -26,3 +28,6 @@ the notes of the version's GitHub Release.
   earthquake is felt nearby, and a scene action reading the levels as one
   sentence.
 - Texts and documentation in English, French, German and Spanish.
+
+[Unreleased]: https://github.com/guim31/gladys-geonet/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-geonet/releases/tag/v1.0.0
