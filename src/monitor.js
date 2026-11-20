@@ -19,6 +19,7 @@
 // changed, plus a heartbeat every 12 hours.
 // -----------------------------------------------------------------------------
 
+import { createHash } from 'node:crypto';
 import { createLogger } from '@gladysassistant/integration-sdk';
 import { colorRank } from './config.js';
 import {
@@ -465,12 +466,18 @@ export class Monitor {
 
   /** Fire `quake_felt` for the new, recent earthquakes of the radius. */
   async detectQuakes(quakes, center) {
-    const key = JSON.stringify([
-      this.config.quakeRadiusKm,
-      this.config.quakeMinMmi,
-      Math.round(center.latitude * 100),
-      Math.round(center.longitude * 100),
-    ]);
+    // A hash: the location of the house is not written to /data.
+    const key = createHash('sha256')
+      .update(
+        JSON.stringify([
+          this.config.quakeRadiusKm,
+          this.config.quakeMinMmi,
+          Math.round(center.latitude * 100),
+          Math.round(center.longitude * 100),
+        ]),
+      )
+      .digest('hex')
+      .slice(0, 16);
     const seen = new Set(Array.isArray(this.data.seenQuakes) ? this.data.seenQuakes : []);
     // First reading, or another radius, intensity or centre: recorded only.
     const seed = this.data.quakeKey !== key;

@@ -30,6 +30,15 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+The integration stores one file under `/data`: the last alert level seen for
+each volcano and the ids of the earthquakes already seen (public data), so a
+restart fires no scene trigger again, and a hash of the earthquake settings and
+centre (to notice their change, without storing the location). It holds no secret and asks for
+no account. It reads the location of the house from Gladys (or coordinates
+typed in the configuration) to compute distances, and never sends it anywhere
+nor writes it to the logs. Its only network traffic is HTTPS requests to
+`api.geonet.org.nz`.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+and the GeoNet services the integration reads.
