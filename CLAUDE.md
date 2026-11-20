@@ -32,15 +32,18 @@ pushing.
 
 ```
 index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/app.js                        registers every SDK handler on the monitor (tests use it too)
+src/monitor.js                    refresh cycles, devices, states, scene triggers, connection status
+src/geonet.js                     GeoNet client (VAL, quakes), parsing
+src/device.js                     device payloads (volcano, New Zealand, felt earthquakes), external ids
+src/messages.js                   texts in en/fr/de/es, dates, sentences
+src/actions.js                    scene action `read_geonet`, configuration action `check_now`
+src/widgets.js                    dashboard widget `geonet`
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+src/store.js, src/geo.js          /data persistence, great-circle distance
+gladys-assistant-integration.json manifest
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys
+test/                             node --test, SDK fake Gladys + fake GeoNet (recorded answers)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -78,8 +81,8 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** is in English, French, German and Spanish: action
+  messages, manifest texts, and `docs/{en,fr,de,es}.md`, kept in sync.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -259,3 +262,23 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## GeoNet (cette intégration)
+
+- API publique sans clé : `https://api.geonet.org.nz`, version demandée par l'en-tête
+  `Accept: application/vnd.geo+json;version=2` (GeoJSON). Licence CC BY 3.0 NZ, à créditer.
+- `/volcano/val` : 12 volcans (`volcanoID` stable, ex. `whiteisland`, `taranakiegmont`), `level` entier 0-5,
+  `acc` (`Green`…`Red`), `activity` et `hazards` en une phrase anglaise. `volcanoTitle` peut changer
+  (« Taranaki Maunga », « Rangitāhua/Kermadec Islands ») : jamais un identifiant.
+- `/quake?MMI=<n>` : les 100 derniers séismes d'intensité ≥ n (n de -1 à 8, sinon HTTP 400 en texte
+  brut), ~1 mois pour n = 3. Un séisme supprimé reste avec `quality: "deleted"` : l'ignorer. `mmi` est
+  l'intensité calculée par GeoNet, pas celle ressentie chez l'utilisateur.
+- La pastille `risk/integer` du front s'arrête à 3 (pas de risque … élevé) : le VAL (0-5) est publié en
+  `counter-sensor/integer`, le code couleur aviation (0-3) en `risk/integer`. Le libellé générique d'une
+  fonctionnalité seule de son type explique les paires de compteurs sur les appareils NZ et séismes.
+- Déclencheur `quake_felt` : uniquement un séisme pas encore vu, de moins de 6 h ; un changement de rayon,
+  d'intensité ou de centre réenregistre la liste sans déclencher (empreinte hachée dans `/data`, jamais
+  les coordonnées).
+- Clés figées : déclencheurs `alert_changed`, `quake_felt` ; champs `volcano_id`, `alert_level`,
+  `direction`, `mmi` ; action `read_geonet` ; widget `geonet` ; ids de plateforme `volcanoID`, `nz`,
+  `felt`.

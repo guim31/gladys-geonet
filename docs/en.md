@@ -1,61 +1,156 @@
-# Demo Devices Template
+# GeoNet
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+Follow the volcanoes of New Zealand and the earthquakes felt around your house from Gladys. The data come
+from [GeoNet](https://www.geonet.org.nz/), the geological hazard monitoring system of New Zealand, run by
+GNS Science. GeoNet rates each volcano (or volcanic field) twice:
+
+- the **Volcanic Alert Level**, from 0 (no volcanic unrest) to 5 (major volcanic eruption);
+- the **Aviation Colour Code**, for the planes: Green, Yellow, Orange, Red.
+
+It also computes the intensity of every New Zealand earthquake on the Modified Mercalli scale (MMI): how
+strongly it is felt, not only its magnitude. No account, no API key.
+
+This is a complement, not a safety alert system: in an emergency, follow the official warnings and Civil
+Defence. Not affiliated with GeoNet nor GNS Science.
+
+**GeoNet or EMSC?** The [EMSC integration](https://github.com/guim31/gladys-emsc) covers the earthquakes of
+the whole world, by magnitude, with the testimonies of the people who felt them. GeoNet covers New Zealand
+only, with the official data of the country: the intensity computed by GeoNet, and the volcanic alert
+levels.
 
 ## What you get
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+- One **device per followed volcano**: alert level (0 to 5), aviation colour code, activity (in GeoNet's
+  words) and distance from your house.
+- A **New Zealand volcanoes** device: the highest alert level in the country, the number of volcanoes at
+  level 1 or more, and the most active one.
+- A **Felt earthquakes** device: magnitude, intensity, distance and place of the latest earthquake within a
+  radius of your house, and the number of them in the last 24 hours.
+- A **dashboard widget**: the latest felt earthquake and your volcanoes, most active first.
+- Two **scene triggers**: an alert level changes; an earthquake is felt nearby.
+- A **scene action** that reads the levels and the latest earthquake as one sentence.
+
+## Requirements
+
+- Gladys Assistant 5.3 or later.
+- Internet access from the Gladys host (the integration reads `api.geonet.org.nz`).
+- For the earthquakes and the distances: a location for your house in Gladys (Settings → Houses), or
+  coordinates typed in the configuration.
 
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+Install the integration from the store (or Integrations → Install from GitHub, with the address
+`https://github.com/guim31/gladys-geonet`), then open its Configuration tab.
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+### Settings
 
-## Actions
+| Setting               | Default   | Effect                                                                       |
+| --------------------- | --------- | ---------------------------------------------------------------------------- |
+| Followed volcanoes    | none      | The volcanoes to follow, one device each                                     |
+| New Zealand device    | on        | The highest level in the country, as a device and in the widget              |
+| Radius                | 100 km    | Off, 25, 50, 100, 200 or 300 km between your house and the epicentre         |
+| Lowest intensity      | 3 – weak  | Weaker earthquakes are ignored (3 weak, 4 light, 5 moderate, 6 strong)       |
+| Centre latitude       | empty     | Leave both coordinates empty to use the location of your house               |
+| Centre longitude      | empty     | Decimal degrees, east positive (`174.7762`)                                  |
+| Refresh interval      | 2 minutes | 1, 2, 5, 10 or 15 minutes                                                    |
+| Language of the texts | French    | Names of the devices and features (at creation) and texts sent to the scenes |
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+Save, then open the Discovery tab and add the devices you want to Gladys. **Show the current levels**
+checks what your settings catch.
 
-## Scenes
+### Volcanoes and alert levels
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+The twelve volcanoes rated by GeoNet: Kermadec Islands (Rangitāhua), Northland, Auckland Volcanic Field,
+Mayor Island (Tūhua), Whakaari/White Island, Okataina (Tarawera), Rotorua, Taupō, Tongariro, Ngāuruhoe,
+Ruapehu and Taranaki Maunga. Levels 0 to 2 describe unrest without eruption (0 none, 1 minor, 2 moderate
+to heightened); 3 to 5 an eruption (3 minor, 4 moderate, 5 major). Read
+[the levels explained by GeoNet](https://www.geonet.org.nz/about/volcano/val).
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+## Devices
 
-## Dashboard
+| Device                | Feature                      | Values                                          |
+| --------------------- | ---------------------------- | ----------------------------------------------- |
+| Volcano …             | Volcanic alert level         | 0 to 5                                          |
+|                       | Aviation colour code         | Risk badge: 0 green, 1 yellow, 2 orange, 3 red  |
+|                       | Volcanic activity            | GeoNet's sentence, in English                   |
+|                       | Distance                     | km from the centre                              |
+| New Zealand volcanoes | Highest alert level          | 0 to 5                                          |
+|                       | Volcanoes at level 1 or more | Count                                           |
+|                       | Most active volcano          | Name, level and colour                          |
+| Felt earthquakes      | Magnitude                    | Of the latest earthquake in the radius          |
+|                       | Intensity (MMI)              | Its intensity, computed by GeoNet               |
+|                       | Felt earthquakes (24 h)      | Earthquakes in the radius in the last 24 hours  |
+|                       | Distance of the epicentre    | km from the centre                              |
+|                       | Latest felt earthquake       | Magnitude, intensity, place and time, in a text |
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+The levels keep their history. The badge of Gladys stops at "high" (3): the alert level is a plain number
+so that levels 4 and 5 stay exact.
+
+## Dashboard widget
+
+Add the **GeoNet** widget to a dashboard. It shows the number of volcanoes at level 1 or more, the latest
+felt earthquake, then your followed volcanoes and, with the New Zealand device, every volcano above
+level 0, most active first. A tap on a row opens its details (GeoNet's sentences, depth of the earthquake)
+and a link to its GeoNet page. Settings: only the volcanoes above level 0, show the latest earthquake,
+show the link to GeoNet.
+
+## Scene triggers
+
+- **GeoNet volcano: alert level changed**: the level or the colour code of any New Zealand volcano
+  changes. Filters: the volcano, the new level, raised or lowered. Variables: `volcano`, `alert_level`,
+  `previous_alert_level`, `direction`, `aviation_color`, `aviation_color_name`, `activity`, `hazards`,
+  `distance_km`, `summary`, `url`.
+- **GeoNet: earthquake felt nearby**: a new earthquake of at least the lowest intensity, within the radius,
+  less than six hours old. Filter: the intensity. Variables: `magnitude`, `mmi`, `mmi_name`,
+  `distance_km`, `depth_km`, `locality`, `time`, `summary`, `url`.
+
+The integration remembers what it has seen under `/data`: a restart fires nothing again, and a new radius,
+intensity or centre fires nothing for the earthquakes already listed.
+
+## Scene action
+
+**GeoNet: read the levels** returns `text` (the volcanoes shown and the latest felt earthquake, in one
+sentence, in the language of the configuration), `max_level` (the highest level among them, 0 to 5) and
+`elevated_count` (those at level 1 or more). When GeoNet does not answer, the action fails and the scene
+says so.
+
+## Scene examples
+
+- Get a message when Ruapehu goes to level 2 or more: trigger "GeoNet volcano: alert level changed",
+  filters "Ruapehu", "Level 2" to "Level 5" and "raised", then send the `summary` and the `url`.
+- Turn on the lights at night when a strong earthquake is felt: trigger "GeoNet: earthquake felt nearby",
+  filter "6 – strong" and above.
+- Every morning, read the levels aloud: scheduled trigger, action "GeoNet: read the levels", then say
+  `text`.
+
+## Data sources, terms and quotas
+
+The data come from GeoNet (GNS Science), through its public API (`https://api.geonet.org.nz`):
+`/volcano/val` for the alert levels and `/quake?MMI=<n>` for the 100 latest earthquakes of intensity n or
+more, at each refresh. They are published under the
+[Creative Commons Attribution 3.0 New Zealand licence (CC BY 3.0 NZ)](https://creativecommons.org/licenses/by/3.0/nz/);
+the integration credits GeoNet in the widget. GeoNet publishes no quota: the integration asks two small
+documents per refresh, every 2 minutes by default. Earthquakes removed by the analysts are ignored.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- **"No centre for the earthquakes and distances"**: give your house a location in Gladys, or type
+  coordinates.
+- **"GeoNet does not answer"**: the values stay as they were; the integration tries again at the next
+  refresh. Check the Internet access of the Gladys host.
+- **No earthquake**: a quieter area, a smaller radius or a higher intensity; check on
+  [geonet.org.nz](https://www.geonet.org.nz/earthquake).
+- **No new device after a change of the list**: open the Discovery tab and add it.
+- Run the container with `LOG_LEVEL=debug` to see each refresh in its logs.
+
+## Limits
+
+- New Zealand only. The intensity is the one GeoNet computes for the earthquake (its strongest expected
+  shaking), not a measure at your house.
+- An earthquake appears on GeoNet a few minutes after it happens, and its values may be revised; the
+  trigger fires once, with the first values.
+- The activity and hazard sentences and the places are in English, as GeoNet writes them.
+- The date of the last level change is known only from the integration's own observation.
+- When no earthquake is left in the radius, the magnitude, intensity and distance keep the values of the
+  last one (their history); the text and the 24 h count say there is none.
+- The name of a device and of its features is fixed at its creation, in the language chosen then.

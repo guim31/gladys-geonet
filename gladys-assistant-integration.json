@@ -1,177 +1,1182 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "GeoNet",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "New Zealand volcanic alert levels and felt earthquakes near your house, from GeoNet",
+    "fr": "Niveaux d'alerte des volcans de Nouvelle-Zélande et séismes ressentis près de chez vous (GeoNet)",
+    "de": "Vulkan-Warnstufen Neuseelands und spürbare Erdbeben in der Nähe deines Hauses, von GeoNet",
+    "es": "Niveles de alerta volcánica de Nueva Zelanda y terremotos sentidos cerca de su casa (GeoNet)"
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
-  "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "docker_image": "ghcr.io/guim31/gladys-geonet:1.0.0",
+  "gladys_version": ">=5.3.0",
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-geonet/main/cover.png",
+  "categories": ["environment", "security"],
+  "transports": ["cloud"],
+  "countries": ["NZ"],
+  "location": true,
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "New Zealand volcanoes",
+        "fr": "Volcans de Nouvelle-Zélande",
+        "de": "Vulkane Neuseelands",
+        "es": "Volcanes de Nueva Zelanda"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "GeoNet (GNS Science) rates the New Zealand volcanoes on the Volcanic Alert Level, from 0 (no unrest) to 5 (major eruption), with an aviation colour code. Follow volcanoes, each as a device, and/or keep one device with the highest level in New Zealand.",
+        "fr": "GeoNet (GNS Science) classe les volcans de Nouvelle-Zélande sur l'échelle Volcanic Alert Level, de 0 (aucune agitation) à 5 (éruption majeure), avec un code couleur aviation. Suivez des volcans, chacun comme un appareil, et/ou gardez un appareil avec le niveau le plus haut du pays.",
+        "de": "GeoNet (GNS Science) bewertet die Vulkane Neuseelands auf der Volcanic Alert Level, von 0 (keine Unruhe) bis 5 (großer Ausbruch), mit einem Luftfahrt-Farbcode. Verfolge Vulkane, jeden als Gerät, und/oder behalte ein Gerät mit der höchsten Stufe Neuseelands.",
+        "es": "GeoNet (GNS Science) clasifica los volcanes de Nueva Zelanda en la escala Volcanic Alert Level, de 0 (sin agitación) a 5 (erupción mayor), con un código de color de aviación. Siga volcanes, cada uno como un dispositivo, y/o conserve un dispositivo con el nivel más alto del país."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/guim31/gladys-geonet/blob/main/docs/en.md",
+          "label": {
+            "en": "Setup guide",
+            "fr": "Guide de configuration",
+            "de": "Einrichtungsanleitung",
+            "es": "Guía de configuración"
+          }
+        },
+        {
+          "url": "https://www.geonet.org.nz/about/volcano/val",
+          "label": {
+            "en": "About the alert levels",
+            "fr": "À propos des niveaux",
+            "de": "Über die Warnstufen",
+            "es": "Acerca de los niveles"
+          }
+        }
+      ]
+    },
+    {
+      "key": "volcanoes",
+      "type": "multi_select",
+      "label": {
+        "en": "Followed volcanoes",
+        "fr": "Volcans suivis",
+        "de": "Verfolgte Vulkane",
+        "es": "Volcanes seguidos"
+      },
+      "description": {
+        "en": "One device per volcano: alert level, aviation colour code, activity and distance from your house.",
+        "fr": "Un appareil par volcan : niveau d'alerte, code couleur aviation, activité et distance à votre maison.",
+        "de": "Ein Gerät pro Vulkan: Warnstufe, Luftfahrt-Farbcode, Aktivität und Entfernung zu deinem Haus.",
+        "es": "Un dispositivo por volcán: nivel de alerta, código de color de aviación, actividad y distancia a su casa."
+      },
+      "required": false,
+      "default": [],
+      "options": [
+        {
+          "value": "kermadecislands",
+          "label": {
+            "en": "Kermadec Islands (Rangitāhua)",
+            "fr": "Kermadec Islands (Rangitāhua)",
+            "de": "Kermadec Islands (Rangitāhua)",
+            "es": "Kermadec Islands (Rangitāhua)"
+          }
+        },
+        {
+          "value": "northland",
+          "label": {
+            "en": "Northland",
+            "fr": "Northland",
+            "de": "Northland",
+            "es": "Northland"
+          }
+        },
+        {
+          "value": "aucklandvolcanicfield",
+          "label": {
+            "en": "Auckland Volcanic Field",
+            "fr": "Auckland Volcanic Field",
+            "de": "Auckland Volcanic Field",
+            "es": "Auckland Volcanic Field"
+          }
+        },
+        {
+          "value": "mayorisland",
+          "label": {
+            "en": "Mayor Island (Tūhua)",
+            "fr": "Mayor Island (Tūhua)",
+            "de": "Mayor Island (Tūhua)",
+            "es": "Mayor Island (Tūhua)"
+          }
+        },
+        {
+          "value": "whiteisland",
+          "label": {
+            "en": "Whakaari/White Island",
+            "fr": "Whakaari/White Island",
+            "de": "Whakaari/White Island",
+            "es": "Whakaari/White Island"
+          }
+        },
+        {
+          "value": "okataina",
+          "label": {
+            "en": "Okataina (Tarawera)",
+            "fr": "Okataina (Tarawera)",
+            "de": "Okataina (Tarawera)",
+            "es": "Okataina (Tarawera)"
+          }
+        },
+        {
+          "value": "rotorua",
+          "label": {
+            "en": "Rotorua",
+            "fr": "Rotorua",
+            "de": "Rotorua",
+            "es": "Rotorua"
+          }
+        },
+        {
+          "value": "taupo",
+          "label": {
+            "en": "Taupō",
+            "fr": "Taupō",
+            "de": "Taupō",
+            "es": "Taupō"
+          }
+        },
+        {
+          "value": "tongariro",
+          "label": {
+            "en": "Tongariro",
+            "fr": "Tongariro",
+            "de": "Tongariro",
+            "es": "Tongariro"
+          }
+        },
+        {
+          "value": "ngauruhoe",
+          "label": {
+            "en": "Ngāuruhoe",
+            "fr": "Ngāuruhoe",
+            "de": "Ngāuruhoe",
+            "es": "Ngāuruhoe"
+          }
+        },
+        {
+          "value": "ruapehu",
+          "label": {
+            "en": "Ruapehu",
+            "fr": "Ruapehu",
+            "de": "Ruapehu",
+            "es": "Ruapehu"
+          }
+        },
+        {
+          "value": "taranakiegmont",
+          "label": {
+            "en": "Taranaki Maunga",
+            "fr": "Taranaki Maunga",
+            "de": "Taranaki Maunga",
+            "es": "Taranaki Maunga"
+          }
+        }
+      ]
+    },
+    {
+      "key": "national",
+      "type": "boolean",
+      "label": {
+        "en": "New Zealand device",
+        "fr": "Appareil Nouvelle-Zélande",
+        "de": "Gerät Neuseeland",
+        "es": "Dispositivo Nueva Zelanda"
+      },
+      "description": {
+        "en": "A \"New Zealand volcanoes\" device: highest alert level in the country, volcanoes at level 1 or more, the most active one. They are also listed in the widget.",
+        "fr": "Un appareil « Volcans de Nouvelle-Zélande » : niveau d'alerte le plus haut du pays, volcans au niveau 1 ou plus, le plus actif. Ils figurent aussi dans le widget.",
+        "de": "Ein Gerät „Vulkane Neuseelands“: höchste Warnstufe des Landes, Vulkane ab Stufe 1, der aktivste. Diese stehen auch im Widget.",
+        "es": "Un dispositivo «Volcanes de Nueva Zelanda»: nivel de alerta más alto del país, volcanes en nivel 1 o más, el más activo. También aparecen en el widget."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "quakes",
+      "type": "section",
+      "label": {
+        "en": "Felt earthquakes",
+        "fr": "Séismes ressentis",
+        "de": "Spürbare Erdbeben",
+        "es": "Terremotos sentidos"
+      },
+      "description": {
+        "en": "GeoNet computes the intensity of every New Zealand earthquake on the Modified Mercalli scale (MMI): 3 weak, felt indoors by a few; 4 light; 5 moderate; 6 strong. A \"Felt earthquakes\" device gives the latest one within the radius of your house.",
+        "fr": "GeoNet calcule l'intensité de chaque séisme de Nouvelle-Zélande sur l'échelle de Mercalli modifiée (MMI) : 3 faible, ressenti à l'intérieur par quelques personnes ; 4 léger ; 5 modéré ; 6 fort. Un appareil « Séismes ressentis » donne le dernier dans le rayon de votre maison.",
+        "de": "GeoNet berechnet die Intensität jedes Erdbebens in Neuseeland auf der modifizierten Mercalli-Skala (MMI): 3 schwach, drinnen von wenigen gespürt; 4 leicht; 5 mäßig; 6 stark. Ein Gerät „Spürbare Erdbeben“ zeigt das letzte im Umkreis deines Hauses.",
+        "es": "GeoNet calcula la intensidad de cada terremoto de Nueva Zelanda en la escala de Mercalli modificada (MMI): 3 débil, sentido en interiores por algunas personas; 4 ligero; 5 moderado; 6 fuerte. Un dispositivo «Terremotos sentidos» da el último en el radio de su casa."
+      }
+    },
+    {
+      "key": "quake_radius",
+      "type": "select",
+      "label": {
+        "en": "Radius",
+        "fr": "Rayon",
+        "de": "Radius",
+        "es": "Radio"
+      },
+      "description": {
+        "en": "Distance between your house and the epicentre. Off: no earthquake device nor trigger.",
+        "fr": "Distance entre votre maison et l'épicentre. Désactivé : ni appareil ni déclencheur de séisme.",
+        "de": "Entfernung zwischen deinem Haus und dem Epizentrum. Aus: weder Erdbebengerät noch Auslöser.",
+        "es": "Distancia entre su casa y el epicentro. Desactivado: ni dispositivo ni disparador de terremotos."
+      },
+      "required": false,
+      "default": "100",
+      "options": [
+        {
+          "value": "0",
+          "label": {
+            "en": "Off",
+            "fr": "Désactivé",
+            "de": "Aus",
+            "es": "Desactivado"
+          }
+        },
+        {
+          "value": "25",
+          "label": {
+            "en": "25 km",
+            "fr": "25 km",
+            "de": "25 km",
+            "es": "25 km"
+          }
+        },
+        {
+          "value": "50",
+          "label": {
+            "en": "50 km",
+            "fr": "50 km",
+            "de": "50 km",
+            "es": "50 km"
+          }
+        },
+        {
+          "value": "100",
+          "label": {
+            "en": "100 km",
+            "fr": "100 km",
+            "de": "100 km",
+            "es": "100 km"
+          }
+        },
+        {
+          "value": "200",
+          "label": {
+            "en": "200 km",
+            "fr": "200 km",
+            "de": "200 km",
+            "es": "200 km"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "300 km",
+            "fr": "300 km",
+            "de": "300 km",
+            "es": "300 km"
+          }
+        }
+      ]
+    },
+    {
+      "key": "quake_min_mmi",
+      "type": "select",
+      "label": {
+        "en": "Lowest intensity",
+        "fr": "Intensité minimale",
+        "de": "Mindestintensität",
+        "es": "Intensidad mínima"
+      },
+      "description": {
+        "en": "Weaker earthquakes are ignored by the device and the trigger.",
+        "fr": "Les séismes plus faibles sont ignorés par l'appareil et le déclencheur.",
+        "de": "Schwächere Erdbeben ignorieren das Gerät und der Auslöser.",
+        "es": "El dispositivo y el disparador ignoran los terremotos más débiles."
+      },
+      "required": false,
+      "default": "3",
+      "options": [
+        {
+          "value": "3",
+          "label": {
+            "en": "3 – weak",
+            "fr": "3 – faible",
+            "de": "3 – schwach",
+            "es": "3 – débil"
+          }
+        },
+        {
+          "value": "4",
+          "label": {
+            "en": "4 – light",
+            "fr": "4 – léger",
+            "de": "4 – leicht",
+            "es": "4 – ligero"
+          }
+        },
+        {
+          "value": "5",
+          "label": {
+            "en": "5 – moderate",
+            "fr": "5 – modéré",
+            "de": "5 – mäßig",
+            "es": "5 – moderado"
+          }
+        },
+        {
+          "value": "6",
+          "label": {
+            "en": "6 – strong",
+            "fr": "6 – fort",
+            "de": "6 – stark",
+            "es": "6 – fuerte"
+          }
         }
       ]
     },
     {
       "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "type": "string",
+      "label": {
+        "en": "Centre latitude",
+        "fr": "Latitude du centre",
+        "de": "Breitengrad des Mittelpunkts",
+        "es": "Latitud del centro"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "description": {
+        "en": "Leave both coordinates empty to use the location of your house in Gladys.",
+        "fr": "Laissez les deux coordonnées vides pour utiliser la position de votre maison dans Gladys.",
+        "de": "Lass beide Koordinaten leer, um den Standort deines Hauses in Gladys zu verwenden.",
+        "es": "Deje ambas coordenadas vacías para usar la ubicación de su casa en Gladys."
+      },
+      "placeholder": {
+        "en": "e.g. -41.2865",
+        "fr": "ex. -41.2865",
+        "de": "z. B. -41.2865",
+        "es": "p. ej. -41.2865"
+      },
+      "required": false,
+      "default": ""
     },
     {
       "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "type": "string",
+      "label": {
+        "en": "Centre longitude",
+        "fr": "Longitude du centre",
+        "de": "Längengrad des Mittelpunkts",
+        "es": "Longitud del centro"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "description": {
+        "en": "Decimal degrees, east positive.",
+        "fr": "Degrés décimaux, est positif.",
+        "de": "Dezimalgrad, Osten positiv.",
+        "es": "Grados decimales, este positivo."
+      },
+      "placeholder": {
+        "en": "e.g. 174.7762",
+        "fr": "ex. 174.7762",
+        "de": "z. B. 174.7762",
+        "es": "p. ej. 174.7762"
+      },
+      "required": false,
+      "default": ""
     },
     {
-      "key": "unit",
+      "key": "refresh_interval",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
+      "description": {
+        "en": "Earthquakes appear on GeoNet a few minutes after they happen; the alert levels change rarely.",
+        "fr": "Les séismes apparaissent sur GeoNet quelques minutes après ; les niveaux d'alerte changent rarement.",
+        "de": "Erdbeben erscheinen einige Minuten danach bei GeoNet; die Warnstufen ändern sich selten.",
+        "es": "Los terremotos aparecen en GeoNet unos minutos después; los niveles de alerta cambian rara vez."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "2",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "1",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "2 minutes",
+            "fr": "2 minutes",
+            "de": "2 Minuten",
+            "es": "2 minutos"
+          }
+        },
+        {
+          "value": "5",
+          "label": {
+            "en": "5 minutes",
+            "fr": "5 minutes",
+            "de": "5 Minuten",
+            "es": "5 minutos"
+          }
+        },
+        {
+          "value": "10",
+          "label": {
+            "en": "10 minutes",
+            "fr": "10 minutes",
+            "de": "10 Minuten",
+            "es": "10 minutos"
+          }
+        },
+        {
+          "value": "15",
+          "label": {
+            "en": "15 minutes",
+            "fr": "15 minutes",
+            "de": "15 Minuten",
+            "es": "15 minutos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the texts",
+        "fr": "Langue des textes",
+        "de": "Sprache der Texte",
+        "es": "Idioma de los textos"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Names of the devices and features (at their creation) and texts sent to scenes.",
+        "fr": "Noms des appareils et fonctionnalités (à leur création) et textes envoyés aux scènes.",
+        "de": "Namen der Geräte und Funktionen (bei ihrer Erstellung) und an Szenen gesendete Texte.",
+        "es": "Nombres de los dispositivos y funciones (al crearlos) y textos enviados a las escenas."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
-    }
-  ],
-  "actions": [
-    {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     },
     {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
+      "key": "about",
+      "type": "section",
+      "label": {
+        "en": "Sources and limits",
+        "fr": "Sources et limites",
+        "de": "Quellen und Grenzen",
+        "es": "Fuentes y límites"
+      },
+      "description": {
+        "en": "Data: GeoNet, GNS Science (CC BY 3.0 NZ), read without account. Not affiliated with GeoNet nor GNS Science. Not a safety alert system: follow the official warnings and Civil Defence.",
+        "fr": "Données : GeoNet, GNS Science (CC BY 3.0 NZ), lues sans compte. Non affiliée à GeoNet ni à GNS Science. Pas un système d'alerte de sécurité : suivez les avis officiels et la Protection civile.",
+        "de": "Daten: GeoNet, GNS Science (CC BY 3.0 NZ), ohne Konto gelesen. Nicht mit GeoNet oder GNS Science verbunden. Kein Sicherheitswarnsystem: Folge den offiziellen Warnungen und dem Katastrophenschutz.",
+        "es": "Datos: GeoNet, GNS Science (CC BY 3.0 NZ), leídos sin cuenta. Sin afiliación con GeoNet ni GNS Science. No es un sistema de alerta de seguridad: siga los avisos oficiales y a la Protección Civil."
+      },
+      "links": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "url": "https://www.geonet.org.nz/",
+          "label": {
+            "en": "GeoNet",
+            "fr": "GeoNet",
+            "de": "GeoNet",
+            "es": "GeoNet"
+          }
         }
       ]
     }
   ],
+  "actions": [
+    {
+      "key": "check_now",
+      "label": {
+        "en": "Show the current levels",
+        "fr": "Afficher les niveaux actuels",
+        "de": "Aktuelle Stufen anzeigen",
+        "es": "Mostrar los niveles actuales"
+      },
+      "timeout_seconds": 60
+    }
+  ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "alert_changed",
+      "label": {
+        "en": "GeoNet volcano: alert level changed",
+        "fr": "Volcan GeoNet : niveau d'alerte changé",
+        "de": "GeoNet-Vulkan: Warnstufe geändert",
+        "es": "Volcán GeoNet: nivel de alerta cambiado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "The alert level or aviation colour code of a New Zealand volcano changes. Leave a filter empty to accept any value.",
+        "fr": "Le niveau d'alerte ou le code couleur aviation d'un volcan de Nouvelle-Zélande change. Laissez un filtre vide pour accepter toute valeur.",
+        "de": "Die Warnstufe oder der Luftfahrt-Farbcode eines Vulkans Neuseelands ändert sich. Lass einen Filter leer, um jeden Wert zu akzeptieren.",
+        "es": "El nivel de alerta o el código de color de aviación de un volcán de Nueva Zelanda cambia. Deje un filtro vacío para aceptar cualquier valor."
       },
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "key": "volcano_id",
+          "type": "multi_select",
+          "label": {
+            "en": "Volcano",
+            "fr": "Volcan",
+            "de": "Vulkan",
+            "es": "Volcán"
+          },
+          "options": [
+            {
+              "value": "kermadecislands",
+              "label": {
+                "en": "Kermadec Islands (Rangitāhua)",
+                "fr": "Kermadec Islands (Rangitāhua)",
+                "de": "Kermadec Islands (Rangitāhua)",
+                "es": "Kermadec Islands (Rangitāhua)"
+              }
+            },
+            {
+              "value": "northland",
+              "label": {
+                "en": "Northland",
+                "fr": "Northland",
+                "de": "Northland",
+                "es": "Northland"
+              }
+            },
+            {
+              "value": "aucklandvolcanicfield",
+              "label": {
+                "en": "Auckland Volcanic Field",
+                "fr": "Auckland Volcanic Field",
+                "de": "Auckland Volcanic Field",
+                "es": "Auckland Volcanic Field"
+              }
+            },
+            {
+              "value": "mayorisland",
+              "label": {
+                "en": "Mayor Island (Tūhua)",
+                "fr": "Mayor Island (Tūhua)",
+                "de": "Mayor Island (Tūhua)",
+                "es": "Mayor Island (Tūhua)"
+              }
+            },
+            {
+              "value": "whiteisland",
+              "label": {
+                "en": "Whakaari/White Island",
+                "fr": "Whakaari/White Island",
+                "de": "Whakaari/White Island",
+                "es": "Whakaari/White Island"
+              }
+            },
+            {
+              "value": "okataina",
+              "label": {
+                "en": "Okataina (Tarawera)",
+                "fr": "Okataina (Tarawera)",
+                "de": "Okataina (Tarawera)",
+                "es": "Okataina (Tarawera)"
+              }
+            },
+            {
+              "value": "rotorua",
+              "label": {
+                "en": "Rotorua",
+                "fr": "Rotorua",
+                "de": "Rotorua",
+                "es": "Rotorua"
+              }
+            },
+            {
+              "value": "taupo",
+              "label": {
+                "en": "Taupō",
+                "fr": "Taupō",
+                "de": "Taupō",
+                "es": "Taupō"
+              }
+            },
+            {
+              "value": "tongariro",
+              "label": {
+                "en": "Tongariro",
+                "fr": "Tongariro",
+                "de": "Tongariro",
+                "es": "Tongariro"
+              }
+            },
+            {
+              "value": "ngauruhoe",
+              "label": {
+                "en": "Ngāuruhoe",
+                "fr": "Ngāuruhoe",
+                "de": "Ngāuruhoe",
+                "es": "Ngāuruhoe"
+              }
+            },
+            {
+              "value": "ruapehu",
+              "label": {
+                "en": "Ruapehu",
+                "fr": "Ruapehu",
+                "de": "Ruapehu",
+                "es": "Ruapehu"
+              }
+            },
+            {
+              "value": "taranakiegmont",
+              "label": {
+                "en": "Taranaki Maunga",
+                "fr": "Taranaki Maunga",
+                "de": "Taranaki Maunga",
+                "es": "Taranaki Maunga"
+              }
+            }
+          ]
         },
         {
-          "key": "target",
+          "key": "alert_level",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "New alert level",
+            "fr": "Nouveau niveau d'alerte",
+            "de": "Neue Warnstufe",
+            "es": "Nuevo nivel de alerta"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "0",
+              "label": {
+                "en": "Level 0",
+                "fr": "Niveau 0",
+                "de": "Stufe 0",
+                "es": "Nivel 0"
+              }
+            },
+            {
+              "value": "1",
+              "label": {
+                "en": "Level 1",
+                "fr": "Niveau 1",
+                "de": "Stufe 1",
+                "es": "Nivel 1"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "en": "Level 2",
+                "fr": "Niveau 2",
+                "de": "Stufe 2",
+                "es": "Nivel 2"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "Level 3",
+                "fr": "Niveau 3",
+                "de": "Stufe 3",
+                "es": "Nivel 3"
+              }
+            },
+            {
+              "value": "4",
+              "label": {
+                "en": "Level 4",
+                "fr": "Niveau 4",
+                "de": "Stufe 4",
+                "es": "Nivel 4"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "Level 5",
+                "fr": "Niveau 5",
+                "de": "Stufe 5",
+                "es": "Nivel 5"
+              }
+            }
+          ]
+        },
+        {
+          "key": "direction",
+          "type": "select",
+          "label": {
+            "en": "Direction",
+            "fr": "Sens",
+            "de": "Richtung",
+            "es": "Sentido"
+          },
+          "options": [
+            {
+              "value": "raised",
+              "label": {
+                "en": "Raised",
+                "fr": "En hausse",
+                "de": "Erhöht",
+                "es": "En aumento"
+              }
+            },
+            {
+              "value": "lowered",
+              "label": {
+                "en": "Lowered",
+                "fr": "En baisse",
+                "de": "Gesenkt",
+                "es": "En descenso"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "volcano",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Volcano",
+            "fr": "Volcan",
+            "de": "Vulkan",
+            "es": "Volcán"
+          }
+        },
+        {
+          "key": "alert_level",
+          "type": "string",
+          "label": {
+            "en": "Alert level (0 to 5)",
+            "fr": "Niveau d'alerte (0 à 5)",
+            "de": "Warnstufe (0 bis 5)",
+            "es": "Nivel de alerta (0 a 5)"
+          }
+        },
+        {
+          "key": "previous_alert_level",
+          "type": "string",
+          "label": {
+            "en": "Previous alert level",
+            "fr": "Niveau d'alerte précédent",
+            "de": "Vorherige Warnstufe",
+            "es": "Nivel de alerta anterior"
+          }
+        },
+        {
+          "key": "direction",
+          "type": "string",
+          "label": {
+            "en": "Direction (raised, lowered)",
+            "fr": "Sens (raised, lowered)",
+            "de": "Richtung (raised, lowered)",
+            "es": "Sentido (raised, lowered)"
+          }
+        },
+        {
+          "key": "aviation_color",
+          "type": "string",
+          "label": {
+            "en": "Aviation colour (green, yellow…)",
+            "fr": "Couleur aviation (green, yellow…)",
+            "de": "Luftfahrtfarbe (green, yellow…)",
+            "es": "Color de aviación (green, yellow…)"
+          }
+        },
+        {
+          "key": "aviation_color_name",
+          "type": "string",
+          "label": {
+            "en": "Aviation colour, in words",
+            "fr": "Couleur aviation, en toutes lettres",
+            "de": "Luftfahrtfarbe, in Worten",
+            "es": "Color de aviación, en palabras"
+          }
+        },
+        {
+          "key": "activity",
+          "type": "string",
+          "label": {
+            "en": "Activity (GeoNet, English)",
+            "fr": "Activité (GeoNet, anglais)",
+            "de": "Aktivität (GeoNet, Englisch)",
+            "es": "Actividad (GeoNet, inglés)"
+          }
+        },
+        {
+          "key": "hazards",
+          "type": "string",
+          "label": {
+            "en": "Hazards (GeoNet, English)",
+            "fr": "Dangers (GeoNet, anglais)",
+            "de": "Gefahren (GeoNet, Englisch)",
+            "es": "Peligros (GeoNet, inglés)"
+          }
+        },
+        {
+          "key": "distance_km",
+          "type": "number",
+          "label": {
+            "en": "Distance (km)",
+            "fr": "Distance (km)",
+            "de": "Entfernung (km)",
+            "es": "Distancia (km)"
+          }
+        },
+        {
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary",
+            "fr": "Résumé",
+            "de": "Zusammenfassung",
+            "es": "Resumen"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "GeoNet page",
+            "fr": "Page GeoNet",
+            "de": "GeoNet-Seite",
+            "es": "Página de GeoNet"
+          }
+        }
+      ]
+    },
+    {
+      "key": "quake_felt",
+      "label": {
+        "en": "GeoNet: earthquake felt nearby",
+        "fr": "GeoNet : séisme ressenti à proximité",
+        "de": "GeoNet: Erdbeben in der Nähe gespürt",
+        "es": "GeoNet: terremoto sentido cerca"
+      },
+      "description": {
+        "en": "A new earthquake of at least the configured intensity, within the radius of your house. Leave the filter empty to accept any intensity.",
+        "fr": "Un nouveau séisme d'au moins l'intensité configurée, dans le rayon de votre maison. Laissez le filtre vide pour accepter toute intensité.",
+        "de": "Ein neues Erdbeben mit mindestens der eingestellten Intensität im Umkreis deines Hauses. Lass den Filter leer, um jede Intensität zu akzeptieren.",
+        "es": "Un nuevo terremoto de al menos la intensidad configurada, en el radio de su casa. Deje el filtro vacío para aceptar cualquier intensidad."
+      },
+      "fields": [
+        {
+          "key": "mmi",
+          "type": "multi_select",
+          "label": {
+            "en": "Intensity (MMI)",
+            "fr": "Intensité (MMI)",
+            "de": "Intensität (MMI)",
+            "es": "Intensidad (MMI)"
+          },
+          "options": [
+            {
+              "value": "3",
+              "label": {
+                "en": "3 – weak",
+                "fr": "3 – faible",
+                "de": "3 – schwach",
+                "es": "3 – débil"
+              }
+            },
+            {
+              "value": "4",
+              "label": {
+                "en": "4 – light",
+                "fr": "4 – léger",
+                "de": "4 – leicht",
+                "es": "4 – ligero"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "5 – moderate",
+                "fr": "5 – modéré",
+                "de": "5 – mäßig",
+                "es": "5 – moderado"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "6 – strong",
+                "fr": "6 – fort",
+                "de": "6 – stark",
+                "es": "6 – fuerte"
+              }
+            },
+            {
+              "value": "7",
+              "label": {
+                "en": "7 – severe",
+                "fr": "7 – sévère",
+                "de": "7 – schwer",
+                "es": "7 – severo"
+              }
+            },
+            {
+              "value": "8",
+              "label": {
+                "en": "8 – extreme",
+                "fr": "8 – extrême",
+                "de": "8 – extrem",
+                "es": "8 – extremo"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "magnitude",
+          "type": "number",
+          "label": {
+            "en": "Magnitude",
+            "fr": "Magnitude",
+            "de": "Magnitude",
+            "es": "Magnitud"
+          }
+        },
+        {
+          "key": "mmi",
+          "type": "string",
+          "label": {
+            "en": "Intensity (MMI)",
+            "fr": "Intensité (MMI)",
+            "de": "Intensität (MMI)",
+            "es": "Intensidad (MMI)"
+          }
+        },
+        {
+          "key": "mmi_name",
+          "type": "string",
+          "label": {
+            "en": "Intensity, in words",
+            "fr": "Intensité, en toutes lettres",
+            "de": "Intensität, in Worten",
+            "es": "Intensidad, en palabras"
+          }
+        },
+        {
+          "key": "distance_km",
+          "type": "number",
+          "label": {
+            "en": "Distance (km)",
+            "fr": "Distance (km)",
+            "de": "Entfernung (km)",
+            "es": "Distancia (km)"
+          }
+        },
+        {
+          "key": "depth_km",
+          "type": "number",
+          "label": {
+            "en": "Depth (km)",
+            "fr": "Profondeur (km)",
+            "de": "Tiefe (km)",
+            "es": "Profundidad (km)"
+          }
+        },
+        {
+          "key": "locality",
+          "type": "string",
+          "label": {
+            "en": "Locality (GeoNet, English)",
+            "fr": "Lieu (GeoNet, anglais)",
+            "de": "Ort (GeoNet, Englisch)",
+            "es": "Localidad (GeoNet, inglés)"
+          }
+        },
+        {
+          "key": "time",
+          "type": "string",
+          "label": {
+            "en": "Time (ISO 8601, UTC)",
+            "fr": "Heure (ISO 8601, UTC)",
+            "de": "Zeit (ISO 8601, UTC)",
+            "es": "Hora (ISO 8601, UTC)"
+          }
+        },
+        {
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary",
+            "fr": "Résumé",
+            "de": "Zusammenfassung",
+            "es": "Resumen"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "GeoNet page",
+            "fr": "Page GeoNet",
+            "de": "GeoNet-Seite",
+            "es": "Página de GeoNet"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "read_geonet",
+      "label": {
+        "en": "GeoNet: read the levels",
+        "fr": "GeoNet : lire les niveaux",
+        "de": "GeoNet: Stufen lesen",
+        "es": "GeoNet: leer los niveles"
       },
-      "timeout_seconds": 15,
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
+      "description": {
+        "en": "The volcanoes shown and the latest felt earthquake, as one sentence to send by message or read aloud.",
+        "fr": "Les volcans affichés et le dernier séisme ressenti, en une phrase à envoyer par message ou à lire.",
+        "de": "Die angezeigten Vulkane und das letzte spürbare Erdbeben als ein Satz, per Nachricht zu senden oder vorzulesen.",
+        "es": "Los volcanes mostrados y el último terremoto sentido, en una frase para enviar por mensaje o leer en voz alta."
+      },
+      "timeout_seconds": 60,
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "text",
+          "type": "string",
+          "label": {
+            "en": "Levels, in one sentence",
+            "fr": "Niveaux, en une phrase",
+            "de": "Stufen, in einem Satz",
+            "es": "Niveles, en una frase"
+          }
+        },
+        {
+          "key": "max_level",
+          "type": "number",
+          "label": {
+            "en": "Highest alert level",
+            "fr": "Niveau d'alerte le plus haut",
+            "de": "Höchste Warnstufe",
+            "es": "Nivel de alerta más alto"
+          }
+        },
+        {
+          "key": "elevated_count",
+          "type": "number",
+          "label": {
+            "en": "Volcanoes at level 1 or more",
+            "fr": "Volcans au niveau 1 ou plus",
+            "de": "Vulkane ab Stufe 1",
+            "es": "Volcanes en nivel 1 o más"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "geonet",
+      "label": {
+        "en": "GeoNet",
+        "fr": "GeoNet",
+        "de": "GeoNet",
+        "es": "GeoNet"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Alert levels of your volcanoes and the latest felt earthquake",
+        "fr": "Niveaux d'alerte de vos volcans et dernier séisme ressenti",
+        "de": "Warnstufen deiner Vulkane und das letzte spürbare Erdbeben",
+        "es": "Niveles de alerta de sus volcanes y último terremoto sentido"
+      },
+      "icon": "alert-triangle",
+      "settings": [
+        {
+          "key": "only_elevated",
+          "type": "boolean",
+          "label": {
+            "en": "Only volcanoes above level 0",
+            "fr": "Seulement au-dessus du niveau 0",
+            "de": "Nur Vulkane über Stufe 0",
+            "es": "Solo por encima del nivel 0"
+          },
+          "default": false
+        },
+        {
+          "key": "show_quake",
+          "type": "boolean",
+          "label": {
+            "en": "Latest felt earthquake",
+            "fr": "Dernier séisme ressenti",
+            "de": "Letztes spürbares Erdbeben",
+            "es": "Último terremoto sentido"
+          },
+          "default": true
+        },
+        {
+          "key": "show_link",
+          "type": "boolean",
+          "label": {
+            "en": "Link to GeoNet",
+            "fr": "Lien vers GeoNet",
+            "de": "Link zu GeoNet",
+            "es": "Enlace a GeoNet"
+          },
+          "default": true
+        }
+      ]
     }
   ]
 }
